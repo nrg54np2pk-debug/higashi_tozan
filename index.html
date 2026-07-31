@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登山部 分担ツール</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 10px;
+        }
+        .container {
+            max-width: 950px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+            font-size: 1.1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        h1 { font-size: 1.3rem; margin-top: 0; }
+        .form-group {
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        label {
+            display: inline-block;
+            width: 140px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 60px;
+            padding: 6px;
+            font-size: 1rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.75rem;
+            margin-top: 8px;
+            table-layout: fixed;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 5px 3px;
+            text-align: center;
+            word-break: break-all;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        button {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            width: 100%;
+            margin-top: 10px;
+            -webkit-tap-highlight-color: transparent;
+        }
+        button:active {
+            opacity: 0.8;
+        }
+        .copy-btn {
+            background-color: #2980b9;
+            font-size: 0.75rem;
+            padding: 6px 10px;
+            width: auto;
+            margin-top: 0;
+            border-radius: 3px;
+        }
+        .item-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            gap: 6px;
+            margin-bottom: 15px;
+        }
+        .item-card {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .item-card label {
+            width: auto;
+            margin-right: 5px;
+            font-weight: normal;
+        }
+        .section-box {
+            margin-top: 15px;
+            border-top: 2px solid #eee;
+            padding-top: 8px;
+        }
+        .badge-level {
+            display: inline-block;
+            padding: 2px 4px;
+            border-radius: 8px;
+            font-weight: bold;
+            color: white;
+            font-size: 0.7rem;
+        }
+        .lvl-1 { background-color: #3498db; }
+        .lvl-2 { background-color: #2ecc71; }
+        .lvl-3 { background-color: #f1c40f; color: #333; }
+        .lvl-4 { background-color: #e67e22; }
+        .lvl-5 { background-color: #e74c3c; }
+        .name-inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 6px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+        }
+        .name-input-item {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            padding: 6px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+        .name-input-item input {
+            width: 100px;
+            padding: 4px;
+            font-size: 0.9rem;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏔️ 登山部 分担ツール</h1>
+    
+    <h2>1. 参加人数と学年内訳</h2>
+    <div class="form-group">
+        <label for="male2Count">男子2年生数:</label>
+        <input type="number" id="male2Count" value="3" min="0" onchange="updateNameInputs()"> 人
+    </div>
+    <div class="form-group">
+        <label for="male1Count">男子1年生数:</label>
+        <input type="number" id="male1Count" value="3" min="0" onchange="updateNameInputs()"> 人
+    </div>
+    <div class="form-group">
+        <label for="female2Count">女子2年生数:</label>
+        <input type="number" id="female2Count" value="2" min="0" onchange="updateNameInputs()"> 人
+    </div>
+    <div class="form-group">
+        <label for="female1Count">女子1年生数:</label>
+        <input type="number" id="female1Count" value="2" min="0" onchange="updateNameInputs()"> 人
+    </div>
+    <div class="form-group">
+        <label for="teacherCount">顧問の人数:</label>
+        <input type="number" id="teacherCount" value="2" min="0"> 人
+    </div>
+
+    <h2>2. 部員のお名前入力（任意）</h2>
+    <div id="nameInputsArea" class="name-inputs-grid"></div>
+
+    <h2>3. その他の持っていく装備・食糧</h2>
+    <div class="item-list" id="itemList"></div>
+
+    <button onclick="calculateBuntan()">班分け＆分担を計算する</button>
+
+    <div id="warningArea"></div>
+
+    <div class="section-box">
+        <h2>
+            <span>4. テント班</span>
+            <button class="copy-btn" onclick="copyResult('tent')">コピー</button>
+        </h2>
+        <div id="tentResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
+    </div>
+
+    <div class="section-box">
+        <h2>
+            <span>5. 食事班</span>
+            <button class="copy-btn" onclick="copyResult('food')">コピー</button>
+        </h2>
+        <div id="foodResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
+    </div>
+
+    <div class="section-box">
+        <h2>
+            <span>6. 個人別の総重量＆評価</span>
+            <button class="copy-btn" onclick="copyResult('member')">コピー</button>
+        </h2>
+        <div id="resultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
+    </div>
+</div>
+
+<script>
+    const baseItems = [
+        { id: 'repair', name: '修理具 (0.1kg)', weight: 0.1, defaultQty: 1, unit: '個', step: '1' },
+        { id: 'rope', name: '補助ロープ (1.5kg)', weight: 1.5, defaultQty: 1, unit: '個', step: '1' },
+        { id: 'zelt', name: 'ツェルト (0.5kg)', weight: 0.5, defaultQty: 1, unit: '個', step: '1' },
+        { id: 'med', name: '医薬品 (1.0kg)', weight: 1.0, defaultQty: 1, unit: '個', step: '1' },
+        { id: 'radio', name: 'ラジオ用紙 (0.6kg)', weight: 0.6, defaultQty: 1, unit: '個', step: '1' },
+        { id: 'foodBreakfast', name: '食糧 朝 (1班)', weight: 1.0, defaultQty: 1, isFood: true, unit: 'kg', step: '0.1' },
+        { id: 'foodDinner', name: '食糧 夜 (1班)', weight: 2.5, defaultQty: 1, isFood: true, unit: 'kg', step: '0.1' }
+    ];
+
+    let lastTentGroups = [];
+    let lastFoodGroups = [];
+    let lastAllMembers = [];
+
+    function initUI() {
+        const listDiv = document.getElementById('itemList');
+        if (!listDiv) return;
+        listDiv.innerHTML = '';
+        baseItems.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'item-card';
+            div.innerHTML = `
+                <label for="qty_${item.id}">${item.name}:</label>
+                <input type="number" id="qty_${item.id}" value="${item.isFood ? item.weight : item.defaultQty}" min="0" step="${item.step}"> ${item.unit}
+            `;
+            listDiv.appendChild(div);
+        });
+        updateNameInputs();
+    }
+
+    function updateNameInputs() {
+        const area = document.getElementById('nameInputsArea');
+        if (!area) return;
+
+        const m2 = parseInt(document.getElementById('male2Count').value) || 0;
+        const m1 = parseInt(document.getElementById('male1Count').value) || 0;
+        const f2 = parseInt(document.getElementById('female2Count').value) || 0;
+        const f1 = parseInt(document.getElementById('female1Count').value) || 0;
+
+        let existingValues = {};
+        area.querySelectorAll('input').forEach(input => {
+            existingValues[input.id] = input.value;
+        });
+
+        let html = '';
+        function makeInputs(count, grade, gender, labelPrefix) {
+            for (let i = 1; i <= count; i++) {
+                let id = `name_${gender}_${grade}_${i}`;
+                let val = existingValues[id] || '';
+                html += `<div class="name-input-item">
+                    <label style="width:70px; font-weight:normal;">${labelPrefix}(${i}):</label>
+                    <input type="text" id="${id}" value="${val}" placeholder="自動">
+                </div>`;
+            }
+        }
+
+        makeInputs(m1, 1, 'male', '男子1年');
+        makeInputs(m2, 2, 'male', '男子2年');
+        makeInputs(f1, 1, 'female', '女子1年');
+        makeInputs(f2, 2, 'female', '女子2年');
+
+        area.innerHTML = html || '<p style="color:#777; font-size:0.8rem; margin:0;">部員が設定されていません</p>';
+    }
+
+    function getLevel(weight) {
+        if (weight >= 5.0) return 5;
+        if (weight >= 4.0) return 4;
+        if (weight >= 3.0) return 3;
+        if (weight >= 2.0) return 2;
+        return 1;
+    }
+
+    function calculateBuntan() {
+        const m2 = parseInt(document.getElementById('male2Count').value);
+        const m1 = parseInt(document.getElementById('male1Count').value);
+        const f2 = parseInt(document.getElementById('female2Count').value);
+        const f1 = parseInt(document.getElementById('female1Count').value);
+        const teacherCount = parseInt(document.getElementById('teacherCount').value);
+
+        if (isNaN(m2) || isNaN(m1) || isNaN(f2) || isNaN(f1) || isNaN(teacherCount) ||
+            m2 < 0 || m1 < 0 || f2 < 0 || f1 < 0 || teacherCount < 0) {
+            alert('⚠️ 人数欄には0以上の正しい数値を入力してください。');
+            return;
+        }
+
+        const totalMembers = m2 + m1 + f2 + f1;
+        if (totalMembers === 0) {
+            alert('⚠️ 部員（生徒）が1人も設定されていません。');
+            return;
+        }
+
+        let males2 = [], males1 = [], females2 = [], females1 = [];
+        
+        for (let i = 1; i <= m1; i++) {
+            let customName = document.getElementById(`name_male_1_${i}`)?.value.trim();
+            males1.push({ id: `M1_${i}`, name: customName ? customName : `男子1年(${i})`, grade: 1, gender: 'male', ratio: 0.9, items: [], totalWeight: 0 });
+        }
+        for (let i = 1; i <= m2; i++) {
+            let customName = document.getElementById(`name_male_2_${i}`)?.value.trim();
+            males2.push({ id: `M2_${i}`, name: customName ? customName : `男子2年(${i})`, grade: 2, gender: 'male', ratio: 1.0, items: [], totalWeight: 0 });
+        }
+        for (let i = 1; i <= f1; i++) {
+            let customName = document.getElementById(`name_female_1_${i}`)?.value.trim();
+            females1.push({ id: `F1_${i}`, name: customName ? customName : `女子1年(${i})`, grade: 1, gender: 'female', ratio: 0.54, items: [], totalWeight: 0 });
+        }
+        for (let i = 1; i <= f2; i++) {
+            let customName = document.getElementById(`name_female_2_${i}`)?.value.trim();
+            females2.push({ id: `F2_${i}`, name: customName ? customName : `女子2年(${i})`, grade: 2, gender: 'female', ratio: 0.6, items: [], totalWeight: 0 });
+        }
+
+        let allMembers = [...males1, ...males2, ...females1, ...females2];
+        lastAllMembers = allMembers;
+
+        // テント班編成
+        let tentGroups = [];
+        let tentCount = 0;
+
+        function makeTentGroups(grade2List, grade1List, genderLabel) {
+            let pool2 = [...grade2List];
+            let pool1 = [...grade1List];
+
+            while (pool2.length > 0 || pool1.length > 0) {
+                let currentGroup = [];
+                if (pool2.length > 0) currentGroup.push(pool2.shift());
+
+                let targetSize = 4;
+                let remainingTotal = pool2.length + pool1.length + currentGroup.length;
+                if (remainingTotal === 3 || remainingTotal === 7) targetSize = 3;
+
+                while (currentGroup.length < targetSize && (pool2.length > 0 || pool1.length > 0)) {
+                    if (pool2.length > 0 && (currentGroup.length < 2 || pool1.length === 0)) {
+                        currentGroup.push(pool2.shift());
+                    } else if (pool1.length > 0) {
+                        currentGroup.push(pool1.shift());
+                    } else if (pool2.length > 0) {
+                        currentGroup.push(pool2.shift());
+                    }
+                }
+
+                tentCount++;
+                let tentName = currentGroup.length === 4 ? 'v6テント' : 'エスパーステント';
+                let tentWeight = currentGroup.length === 4 ? 3.1 : 2.0;
+
+                let leader2Year = currentGroup.find(m => m.grade === 2) || currentGroup[0];
+                let tentBodyGear = { name: tentName, weight: tentWeight };
+                leader2Year.items.push(tentBodyGear);
+                leader2Year.totalWeight += tentBodyGear.weight;
+
+                let tentAccessories = [
+                    { name: 'ポール', weight: 0.65 },
+                    { name: 'ペグ', weight: 0.63 },
+                    { name: 'ハンマー', weight: 0.5 },
+                    { name: '銀マット', weight: 0.2 },
+                    { name: '銀マット', weight: 0.2 }
+                ];
+
+                tentGroups.push({
+                    groupName: `${genderLabel}テント${tentCount}`,
+                    tentType: tentName,
+                    members: currentGroup,
+                    accessories: tentAccessories
+                });
+            }
+        }
+
+        if (males2.length > 0 || males1.length > 0) makeTentGroups(males2, males1, '男子');
+        if (females2.length > 0 || females1.length > 0) makeTentGroups(females2, females1, '女子');
+        lastTentGroups = tentGroups;
+
+        // 食事班編成
+        let foodGroups = [];
+        let poolM2 = [...males2], poolM1 = [...males1], poolF2 = [...females2], poolF1 = [...females1];
+        let totalNumGroups = Math.ceil(totalMembers / 5);
+        if (totalNumGroups < 1) totalNumGroups = 1;
+
+        for (let i = 0; i < totalNumGroups; i++) {
+            foodGroups.push({ groupName: `食事班${i + 1}`, members: [], gearSet: [] });
+        }
+
+        let groupIdx = 0;
+        while ((poolF2.length > 0 || poolF1.length > 0) && groupIdx < totalNumGroups) {
+            let fMember = poolF2.length > 0 ? poolF2.shift() : poolF1.shift();
+            foodGroups[groupIdx].members.push(fMember);
+            groupIdx = (groupIdx + 1) % totalNumGroups;
+        }
+
+        let allRemainingPool = [...poolM2, ...poolF2, ...poolM1, ...poolF1];
+        allRemainingPool.sort((a, b) => b.grade - a.grade);
+
+        groupIdx = 0;
+        while (allRemainingPool.length > 0) {
+            while (foodGroups[groupIdx].members.length >= 6 || (foodGroups[groupIdx].members.length >= 5 && allRemainingPool.length + foodGroups.reduce((s, g) => s + g.members.length, 0) > totalNumGroups * 5)) {
+                groupIdx = (groupIdx + 1) % totalNumGroups;
+            }
+            foodGroups[groupIdx].members.push(allRemainingPool.shift());
+            groupIdx = (groupIdx + 1) % totalNumGroups;
+        }
+
+        const bfastGroupWeight = parseFloat(document.getElementById('qty_foodBreakfast')?.value) || 0;
+        const dinnerGroupWeight = parseFloat(document.getElementById('qty_foodDinner')?.value) || 0;
+
+        foodGroups.forEach(fg => {
+            let foodGearSet = [
+                { name: 'シート', weight: 0.15 },
+                { name: 'コッフェル', weight: 0.5 },
+                { name: '調理器具', weight: 0.25 },
+                { name: 'ガスヘッド', weight: 0.1 },
+                { name: 'ガスヘッド', weight: 0.1 },
+                { name: 'ガス缶', weight: 0.3 },
+                { name: 'ガス缶', weight: 0.3 },
+                { name: 'ガス缶', weight: 0.3 }
+            ];
+            if (bfastGroupWeight > 0) foodGearSet.push({ name: '食糧朝', weight: bfastGroupWeight });
+            if (dinnerGroupWeight > 0) foodGearSet.push({ name: '食糧夜', weight: dinnerGroupWeight });
+            fg.gearSet = foodGearSet;
+            fg.totalWeight = foodGearSet.reduce((sum, item) => sum + item.weight, 0);
+        });
+        lastFoodGroups = foodGroups;
+
+        // 装備の平準化割り当て
+        let allPendingItems = [];
+        tentGroups.forEach(tg => allPendingItems.push(...tg.accessories));
+
+        let teacherTentSetsCount = Math.ceil(teacherCount / 2);
+        for (let t = 0; t < teacherTentSetsCount; t++) {
+            allPendingItems.push(
+                { name: '顧問テント', weight: 2.0 },
+                { name: '顧問ポール', weight: 0.65 },
+                { name: '顧問ペグ', weight: 0.63 },
+                { name: '顧問マット', weight: 0.4 }
+            );
+        }
+
+        foodGroups.forEach(fg => allPendingItems.push(...fg.gearSet));
+
+        baseItems.forEach(item => {
+            if (item.isFood) return;
+            const inputEl = document.getElementById(`qty_${item.id}`);
+            const qty = inputEl ? (parseInt(inputEl.value) || 0) : item.defaultQty;
+            for (let i = 0; i < qty; i++) {
+                allPendingItems.push({ name: item.name.split(' ')[0], weight: item.weight });
+            }
+        });
+
+        allPendingItems.sort((a, b) => b.weight - a.weight);
+
+        allPendingItems.forEach(gear => {
+            allMembers.sort((a, b) => (a.totalWeight / a.ratio) - (b.totalWeight / b.ratio));
+            allMembers[0].items.push(gear);
+            allMembers[0].totalWeight += gear.weight;
+        });
+
+        // 警告チェッカー
+        let warnings = [];
+        let heavyMembers = allMembers.filter(m => m.totalWeight >= 4.0);
+        if (heavyMembers.length > 0) {
+            let names = heavyMembers.map(m => `${m.name}(${m.totalWeight.toFixed(1)}kg)`).join(', ');
+            warnings.push(`⚠️ 負担重量4kg以上の部員がいます：${names}`);
+        }
+
+        let warningHtml = '';
+        if (warnings.length > 0) {
+            warningHtml = `<div class="warning-box"><strong>【注意】</strong><br>` + warnings.join('<br>') + `</div>`;
+        } else {
+            warningHtml = `<div class="warning-box" style="background-color:#d4edda; border-color:#c3e6cb; color:#155724;">✅ 偏りや過負荷は見つかりませんでした。</div>`;
+        }
+        document.getElementById('warningArea').innerHTML = warningHtml;
+
+        // 結果描画（幅を固定して折り返し表示）
+        let tentHtml = `<table>
+            <colgroup>
+                <col style="width: 25%;">
+                <col style="width: 25%;">
+                <col style="width: 50%;">
+            </colgroup>
+            <tr><th>班名</th><th>テント</th><th>メンバー</th></tr>`;
+        tentGroups.forEach(tg => {
+            let mNames = tg.members.map(m => m.name).join(', ');
+            tentHtml += `<tr><td><strong>${tg.groupName}</strong></td><td>${tg.tentType}</td><td style="text-align: left;">${mNames}</td></tr>`;
+        });
+        tentHtml += `</table>`;
+        document.getElementById('tentResultArea').innerHTML = tentHtml;
+
+        let foodHtml = `<table>
+            <colgroup>
+                <col style="width: 25%;">
+                <col style="width: 15%;">
+                <col style="width: 20%;">
+                <col style="width: 40%;">
+            </colgroup>
+            <tr><th>班名</th><th>人数</th><th>合計</th><th>メンバー</th></tr>`;
+        foodGroups.forEach(fg => {
+            let mNames = fg.members.map(m => m.name).join(', ');
+            foodHtml += `<tr><td><strong>${fg.groupName}</strong></td><td>${fg.members.length}人</td><td><strong>${fg.totalWeight.toFixed(1)}kg</strong></td><td style="text-align: left;">${mNames}</td></tr>`;
+        });
+        foodHtml += `</table>`;
+        document.getElementById('foodResultArea').innerHTML = foodHtml;
+
+        let resHtml = `<table>
+            <colgroup>
+                <col style="width: 22%;">
+                <col style="width: 12%;">
+                <col style="width: 42%;">
+                <col style="width: 24%;">
+            </colgroup>
+            <tr><th>名前</th><th>係数</th><th>担当装備</th><th>合計/評価</th></tr>`;
+        allMembers.forEach(m => {
+            const itemNames = m.items.map(i => `${i.name}(${i.weight}kg)`).join(', ');
+            const lvl = getLevel(m.totalWeight);
+            resHtml += `<tr>
+                <td><strong>${m.name}</strong></td>
+                <td>${m.ratio}</td>
+                <td style="text-align: left;">${itemNames || '（なし）'}</td>
+                <td><strong>${m.totalWeight.toFixed(1)}kg</strong><br><span class="badge-level lvl-${lvl}">Lv.${lvl}</span></td>
+            </tr>`;
+        });
+        resHtml += `</table>`;
+        document.getElementById('resultArea').innerHTML = resHtml;
+    }
+
+    function copyResult(type) {
+        let text = "";
+        if (type === 'tent') {
+            if (lastTentGroups.length === 0) { alert('先に計算してください。'); return; }
+            text += "【テント班編成】\n";
+            lastTentGroups.forEach(tg => {
+                let mNames = tg.members.map(m => m.name).join(', ');
+                text += `■ ${tg.groupName} (${tg.tentType})\n  メンバー: ${mNames}\n`;
+            });
+        } else if (type === 'food') {
+            if (lastFoodGroups.length === 0) { alert('先に計算してください。'); return; }
+            text += "【食事班編成】\n";
+            lastFoodGroups.forEach(fg => {
+                let mNames = fg.members.map(m => m.name).join(', ');
+                text += `■ ${fg.groupName} (${fg.totalWeight.toFixed(2)}kg)\n  メンバー: ${mNames}\n`;
+            });
+        } else if (type === 'member') {
+            if (lastAllMembers.length === 0) { alert('先に計算してください。'); return; }
+            text += "【個人別 担当装備一覧】\n";
+            lastAllMembers.forEach(m => {
+                let itemNames = m.items.map(i => `${i.name}(${i.weight}kg)`).join(', ');
+                text += `・${m.name}: ${m.totalWeight.toFixed(2)}kg [${itemNames}]\n`;
+            });
+        }
+
+        navigator.clipboard.writeText(text).then(() => {
+            alert('コピーしました！LINEなどに貼り付けられます。');
+        }).catch(() => {
+            alert('コピーに失敗しました。');
+        });
+    }
+
+    setTimeout(initUI, 500);
+</script>
+
+</body>
+</html>
