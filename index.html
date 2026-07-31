@@ -39,11 +39,11 @@
             width: 140px;
             font-weight: bold;
         }
-        input[type="number"] {
-            width: 60px;
+        input[type="number"], input[type="text"] {
             padding: 6px;
             font-size: 1rem;
         }
+        input[type="number"] { width: 60px; }
         table {
             width: 100%;
             border-collapse: collapse;
@@ -85,11 +85,19 @@
             margin-top: 0;
             border-radius: 3px;
         }
+        .del-item-btn {
+            background-color: #e74c3c;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            width: auto;
+            margin-top: 0;
+            border-radius: 3px;
+        }
         .item-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
             gap: 6px;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
         }
         .item-card {
             background: #fafafa;
@@ -97,11 +105,35 @@
             padding: 6px;
             border-radius: 4px;
             font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
-        .item-card label {
+        .item-card-left {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .add-item-box {
+            background: #f8f9fa;
+            border: 1px dashed #cbd5e1;
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+        .add-item-box input[type="text"] { width: 110px; }
+        .add-item-box input[type="number"] { width: 55px; }
+        .add-btn {
+            background-color: #8e44ad;
             width: auto;
-            margin-right: 5px;
-            font-weight: normal;
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            margin-top: 0;
         }
         .section-box {
             margin-top: 15px;
@@ -181,17 +213,26 @@
     <h2>2. 部員のお名前入力（任意）</h2>
     <div id="nameInputsArea" class="name-inputs-grid"></div>
 
-    <h2>3. その他の持っていく装備・食糧</h2>
+    <h2>3. 荷物・装備・食糧の設定</h2>
     <div class="item-list" id="itemList"></div>
 
-    <button onclick="calculateBuntan()">班分け＆分担を計算する</button>
+    <!-- 荷物の追加フォーム -->
+    <div class="add-item-box">
+        <span>➕ <strong>荷物を追加:</strong></span>
+        <input type="text" id="newItemName" placeholder="装備名">
+        <input type="number" id="newItemWeight" placeholder="重さ" step="0.1" min="0.1" value="1.0"> kg
+        <input type="number" id="newItemQty" placeholder="数量" min="1" value="1"> 個
+        <button type="button" class="add-btn" onclick="addNewItem()">リストに追加</button>
+    </div>
+
+    <button type="button" onclick="calculateBuntan()">班分け＆分担を計算する</button>
 
     <div id="warningArea"></div>
 
     <div class="section-box">
         <h2>
             <span>4. テント班</span>
-            <button class="copy-btn" onclick="copyResult('tent')">コピー</button>
+            <button type="button" class="copy-btn" onclick="copyResult('tent')">コピー</button>
         </h2>
         <div id="tentResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
     </div>
@@ -199,7 +240,7 @@
     <div class="section-box">
         <h2>
             <span>5. 食事班</span>
-            <button class="copy-btn" onclick="copyResult('food')">コピー</button>
+            <button type="button" class="copy-btn" onclick="copyResult('food')">コピー</button>
         </h2>
         <div id="foodResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
     </div>
@@ -207,21 +248,21 @@
     <div class="section-box">
         <h2>
             <span>6. 個人別の総重量＆評価</span>
-            <button class="copy-btn" onclick="copyResult('member')">コピー</button>
+            <button type="button" class="copy-btn" onclick="copyResult('member')">コピー</button>
         </h2>
         <div id="resultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
     </div>
 </div>
 
 <script>
-    const baseItems = [
-        { id: 'repair', name: '修理具 (0.1kg)', weight: 0.1, defaultQty: 1, unit: '個', step: '1' },
-        { id: 'rope', name: '補助ロープ (1.5kg)', weight: 1.5, defaultQty: 1, unit: '個', step: '1' },
-        { id: 'zelt', name: 'ツェルト (0.5kg)', weight: 0.5, defaultQty: 1, unit: '個', step: '1' },
-        { id: 'med', name: '医薬品 (1.0kg)', weight: 1.0, defaultQty: 1, unit: '個', step: '1' },
-        { id: 'radio', name: 'ラジオ用紙 (0.6kg)', weight: 0.6, defaultQty: 1, unit: '個', step: '1' },
-        { id: 'foodBreakfast', name: '食糧 朝 (1班)', weight: 1.0, defaultQty: 1, isFood: true, unit: 'kg', step: '0.1' },
-        { id: 'foodDinner', name: '食糧 夜 (1班)', weight: 2.5, defaultQty: 1, isFood: true, unit: 'kg', step: '0.1' }
+    let customItems = [
+        { id: 'repair', name: '修理具', weight: 0.1, qty: 1, unit: '個', isCustom: false },
+        { id: 'rope', name: '補助ロープ', weight: 1.5, qty: 1, unit: '個', isCustom: false },
+        { id: 'zelt', name: 'ツェルト', weight: 0.5, qty: 1, unit: '個', isCustom: false },
+        { id: 'med', name: '医薬品', weight: 1.0, qty: 1, unit: '個', isCustom: false },
+        { id: 'radio', name: 'ラジオ用紙', weight: 0.6, qty: 1, unit: '個', isCustom: false },
+        { id: 'foodBreakfast', name: '食糧 朝 (1班)', weight: 1.0, qty: 1, isFood: true, unit: 'kg', isCustom: false },
+        { id: 'foodDinner', name: '食糧 夜 (1班)', weight: 2.5, qty: 1, isFood: true, unit: 'kg', isCustom: false }
     ];
 
     let lastTentGroups = [];
@@ -229,19 +270,67 @@
     let lastAllMembers = [];
 
     function initUI() {
+        renderItemList();
+        updateNameInputs();
+    }
+
+    function renderItemList() {
         const listDiv = document.getElementById('itemList');
         if (!listDiv) return;
         listDiv.innerHTML = '';
-        baseItems.forEach(item => {
+
+        customItems.forEach((item, index) => {
             const div = document.createElement('div');
             div.className = 'item-card';
             div.innerHTML = `
-                <label for="qty_${item.id}">${item.name}:</label>
-                <input type="number" id="qty_${item.id}" value="${item.isFood ? item.weight : item.defaultQty}" min="0" step="${item.step}"> ${item.unit}
+                <div class="item-card-left">
+                    <span>${item.name} (${item.weight}kg)</span>
+                    <input type="number" id="item_qty_${index}" value="${item.qty}" min="0" step="${item.isFood ? '0.1' : '1'}" style="width:50px; padding:3px;">
+                </div>
+                ${item.isCustom ? `<button type="button" class="del-item-btn" onclick="removeCustomItem(${index})">削除</button>` : `<span style="font-size:0.75rem; color:#777;">${item.unit}</span>`}
             `;
             listDiv.appendChild(div);
         });
-        updateNameInputs();
+    }
+
+    function addNewItem() {
+        const nameInput = document.getElementById('newItemName');
+        const weightInput = document.getElementById('newItemWeight');
+        const qtyInput = document.getElementById('newItemQty');
+
+        const name = nameInput.value.trim();
+        const weight = parseFloat(weightInput.value);
+        const qty = parseFloat(qtyInput.value);
+
+        if (!name) {
+            alert('⚠️ 装備名を入力してください。');
+            return;
+        }
+        if (isNaN(weight) || weight <= 0) {
+            alert('⚠️ 正しい重さ（kg）を入力してください。');
+            return;
+        }
+        if (isNaN(qty) || qty < 0) {
+            alert('⚠️ 正しい数量を入力してください。');
+            return;
+        }
+
+        customItems.push({
+            id: 'custom_' + Date.now(),
+            name: name,
+            weight: weight,
+            qty: qty,
+            unit: '個',
+            isCustom: true
+        });
+
+        nameInput.value = '';
+        renderItemList();
+    }
+
+    function removeCustomItem(index) {
+        customItems.splice(index, 1);
+        renderItemList();
     }
 
     function updateNameInputs() {
@@ -305,6 +394,13 @@
             return;
         }
 
+        customItems.forEach((item, index) => {
+            const inputEl = document.getElementById(`item_qty_${index}`);
+            if (inputEl) {
+                item.qty = parseFloat(inputEl.value) || 0;
+            }
+        });
+
         let males2 = [], males1 = [], females2 = [], females1 = [];
         
         for (let i = 1; i <= m1; i++) {
@@ -327,7 +423,6 @@
         let allMembers = [...males1, ...males2, ...females1, ...females2];
         lastAllMembers = allMembers;
 
-        // テント班編成
         let tentGroups = [];
         let tentCount = 0;
 
@@ -383,7 +478,6 @@
         if (females2.length > 0 || females1.length > 0) makeTentGroups(females2, females1, '女子');
         lastTentGroups = tentGroups;
 
-        // 食事班編成
         let foodGroups = [];
         let poolM2 = [...males2], poolM1 = [...males1], poolF2 = [...females2], poolF1 = [...females1];
         let totalNumGroups = Math.ceil(totalMembers / 5);
@@ -412,8 +506,10 @@
             groupIdx = (groupIdx + 1) % totalNumGroups;
         }
 
-        const bfastGroupWeight = parseFloat(document.getElementById('qty_foodBreakfast')?.value) || 0;
-        const dinnerGroupWeight = parseFloat(document.getElementById('qty_foodDinner')?.value) || 0;
+        const bfastItem = customItems.find(i => i.id === 'foodBreakfast');
+        const dinnerItem = customItems.find(i => i.id === 'foodDinner');
+        const bfastGroupWeight = bfastItem ? bfastItem.qty : 0;
+        const dinnerGroupWeight = dinnerItem ? dinnerItem.qty : 0;
 
         foodGroups.forEach(fg => {
             let foodGearSet = [
@@ -433,7 +529,6 @@
         });
         lastFoodGroups = foodGroups;
 
-        // 装備の平準化割り当て
         let allPendingItems = [];
         tentGroups.forEach(tg => allPendingItems.push(...tg.accessories));
 
@@ -449,12 +544,10 @@
 
         foodGroups.forEach(fg => allPendingItems.push(...fg.gearSet));
 
-        baseItems.forEach(item => {
+        customItems.forEach(item => {
             if (item.isFood) return;
-            const inputEl = document.getElementById(`qty_${item.id}`);
-            const qty = inputEl ? (parseInt(inputEl.value) || 0) : item.defaultQty;
-            for (let i = 0; i < qty; i++) {
-                allPendingItems.push({ name: item.name.split(' ')[0], weight: item.weight });
+            for (let i = 0; i < item.qty; i++) {
+                allPendingItems.push({ name: item.name, weight: item.weight });
             }
         });
 
@@ -466,7 +559,6 @@
             allMembers[0].totalWeight += gear.weight;
         });
 
-        // 警告チェッカー
         let warnings = [];
         let heavyMembers = allMembers.filter(m => m.totalWeight >= 4.0);
         if (heavyMembers.length > 0) {
@@ -482,13 +574,8 @@
         }
         document.getElementById('warningArea').innerHTML = warningHtml;
 
-        // 結果描画（幅を固定して折り返し表示）
         let tentHtml = `<table>
-            <colgroup>
-                <col style="width: 25%;">
-                <col style="width: 25%;">
-                <col style="width: 50%;">
-            </colgroup>
+            <colgroup><col style="width: 25%;"><col style="width: 25%;"><col style="width: 50%;"></colgroup>
             <tr><th>班名</th><th>テント</th><th>メンバー</th></tr>`;
         tentGroups.forEach(tg => {
             let mNames = tg.members.map(m => m.name).join(', ');
@@ -498,12 +585,7 @@
         document.getElementById('tentResultArea').innerHTML = tentHtml;
 
         let foodHtml = `<table>
-            <colgroup>
-                <col style="width: 25%;">
-                <col style="width: 15%;">
-                <col style="width: 20%;">
-                <col style="width: 40%;">
-            </colgroup>
+            <colgroup><col style="width: 25%;"><col style="width: 15%;"><col style="width: 20%;"><col style="width: 40%;"></colgroup>
             <tr><th>班名</th><th>人数</th><th>合計</th><th>メンバー</th></tr>`;
         foodGroups.forEach(fg => {
             let mNames = fg.members.map(m => m.name).join(', ');
@@ -513,12 +595,7 @@
         document.getElementById('foodResultArea').innerHTML = foodHtml;
 
         let resHtml = `<table>
-            <colgroup>
-                <col style="width: 22%;">
-                <col style="width: 12%;">
-                <col style="width: 42%;">
-                <col style="width: 24%;">
-            </colgroup>
+            <colgroup><col style="width: 22%;"><col style="width: 12%;"><col style="width: 42%;"><col style="width: 24%;"></colgroup>
             <tr><th>名前</th><th>係数</th><th>担当装備</th><th>合計/評価</th></tr>`;
         allMembers.forEach(m => {
             const itemNames = m.items.map(i => `${i.name}(${i.weight}kg)`).join(', ');
@@ -566,7 +643,7 @@
         });
     }
 
-    setTimeout(initUI, 500);
+    window.onload = initUI;
 </script>
 
 </body>
