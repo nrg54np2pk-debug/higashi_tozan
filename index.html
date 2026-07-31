@@ -360,13 +360,15 @@
             if(vInput) it.vol = parseFloat(vInput.value) || 0;
         });
 
-        // メンバー作成
+        // メンバー作成（hasTentBody プロパティを追加）
         let m2L=[], m1L=[], f2L=[], f1L=[];
         const getN = (id, def) => document.getElementById(id)?.value.trim() || def;
-        for(let i=1;i<=m1;i++) m1L.push({ name: getN(`n_m_1_${i}`,`男子1年(${i})`), gr:1, sx:'m', ratio:0.9, items:[], w:0, v:0, tentName:'', foodName:'' });
-        for(let i=1;i<=m2;i++) m2L.push({ name: getN(`n_m_2_${i}`,`男子2年(${i})`), gr:2, sx:'m', ratio:1.0, items:[], w:0, v:0, tentName:'', foodName:'' });
-        for(let i=1;i<=f1;i++) f1L.push({ name: getN(`n_f_1_${i}`,`女子1年(${i})`), gr:1, sx:'f', ratio:0.65, items:[], w:0, v:0, tentName:'', foodName:'' });
-        for(let i=1;i<=f2;i++) f2L.push({ name: getN(`n_f_2_${i}`,`女子2年(${i})`), gr:2, sx:'f', ratio:0.6, items:[], w:0, v:0, tentName:'', foodName:'' });
+        const initM = (name, gr, sx, ratio) => ({ name, gr, sx, ratio, items:[], w:0, v:0, tentName:'', foodName:'', hasTentBody: false });
+        
+        for(let i=1;i<=m1;i++) m1L.push(initM(getN(`n_m_1_${i}`,`男子1年(${i})`), 1, 'm', 0.9));
+        for(let i=1;i<=m2;i++) m2L.push(initM(getN(`n_m_2_${i}`,`男子2年(${i})`), 2, 'm', 1.0));
+        for(let i=1;i<=f1;i++) f1L.push(initM(getN(`n_f_1_${i}`,`女子1年(${i})`), 1, 'f', 0.65));
+        for(let i=1;i<=f2;i++) f2L.push(initM(getN(`n_f_2_${i}`,`女子2年(${i})`), 2, 'f', 0.6));
         
         let allM = [...m1L, ...m2L, ...f1L, ...f2L];
         g_members = allM;
@@ -374,6 +376,7 @@
         // --- テント班 ---
         let tents = [], tCnt = 0;
         if(nights > 0) {
+            // 男子チーム
             if(m2+m1 > 0) {
                 let p2 = [...m2L], p1 = [...m1L];
                 while(p2.length > 0) {
@@ -381,11 +384,11 @@
                     let rem = p2.length + p1.length;
                     let size = (rem === 3 || rem === 7) ? 3 : 4;
                     while(grp.length < size && p2.length > 0) {
-                        let member = p2.shift();
-                        grp.push(member);
+                        grp.push(p2.shift());
                     }
                     tCnt++;
-                    let tName = 'v6テント';
+                    // 4人班にはエスパース・アライは使用しないためv6にする
+                    let tName = 'v6テント'; 
                     let tW = 3.1, tV = 10;
                     let tentObjName = `テント${tCnt}`;
                     grp.forEach(m => m.tentName = tentObjName);
@@ -415,9 +418,16 @@
                         grp.push(p1.shift());
                     }
                     tCnt++;
-                    espCount++;
-                    let tName = (espCount <= ESP_LIMIT) ? 'エスパース' : 'アライ';
-                    let tW = 2.0, tV = 8;
+                    
+                    // 4人班にはエスパース・アライは使用しないルール
+                    let tName = 'v6テント';
+                    let tW = 3.1, tV = 10;
+                    if (grp.length === 3) {
+                        espCount++;
+                        tName = (espCount <= ESP_LIMIT) ? 'エスパース' : 'アライ';
+                        tW = 2.0; tV = 8;
+                    }
+
                     let tentObjName = `テント${tCnt}`;
                     grp.forEach(m => m.tentName = tentObjName);
                     
@@ -437,6 +447,7 @@
                 }
             }
 
+            // 女子チーム
             if(f2+f1 > 0) {
                 let p2 = [...f2L], p1 = [...f1L];
                 while(p2.length > 0 || p1.length > 0) {
@@ -450,6 +461,7 @@
                         else grp.push(p2.shift());
                     }
                     tCnt++;
+                    // 4人班にはエスパース・アライは使用しない
                     let tName = grp.length === 4 ? 'v6テント' : 'エスパース';
                     let tW = grp.length === 4 ? 3.1 : 2.0;
                     let tV = grp.length === 4 ? 10 : 8; 
@@ -489,7 +501,7 @@
                 gIdx=(gIdx+1)%numG;
             }
 
-            foods.forEach((fg, idx) => {
+            foods.forEach((fg) => {
                 fg.m.forEach(m => m.foodName = fg.name);
             });
 
@@ -498,7 +510,7 @@
             const dW = customItems.find(i=>i.id==='fd')?.weight||0;
             const dV = customItems.find(i=>i.id==='fd')?.vol||0;
 
-            foods.forEach((fg, idx) => {
+            foods.forEach((fg) => {
                 let foodObjName = fg.name;
                 let set = [
                     { name:`シート(${foodObjName})`, w:0.15, v:1, foodName: foodObjName },
@@ -523,7 +535,7 @@
         }
         g_foods = foods;
 
-        // --- 共通装備の収集と分配（テント・食事の所属一致ロジック） ---
+        // --- 共通装備の収集と分配 ---
         let generalPending = [];
         customItems.forEach(it => {
             if(it.isFood) return;
@@ -540,9 +552,10 @@
             }
         }
 
-        // 1. テント関係物は「同じテント班のメンバー」にのみ割り当てる
+        // 1. テント関係物の割り当て（同じテント班のメンバー内）
         tents.forEach(tObj => {
             let tentItems = [...tObj.acc];
+            // 重い順にソートすることで本体がポール等より先に処理される
             tentItems.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
 
             tentItems.forEach(item => {
@@ -552,13 +565,25 @@
                     let sB = (b.w / b.ratio) + (b.v / b.ratio * 0.2);
                     return sA - sB;
                 });
-                membersInTent[0].items.push(item);
-                membersInTent[0].w += item.w;
-                membersInTent[0].v += item.v;
+
+                let target = membersInTent[0];
+                // 【ルール追加】テント本体を持つ人にはポールを持たせない
+                if (item.name.includes('ポール')) {
+                    target = membersInTent.find(m => !m.hasTentBody) || membersInTent[0];
+                }
+
+                target.items.push(item);
+                target.w += item.w;
+                target.v += item.v;
+
+                // テント本体を割り当てられた部員にフラグを立てる
+                if (item.name.includes('本体')) {
+                    target.hasTentBody = true;
+                }
             });
         });
 
-        // 2. 食事関係物は「同じ食事班のメンバー」にのみ割り当てる
+        // 2. 食事関係物の割り当て（同じ食事班のメンバー内）
         foods.forEach(fObj => {
             let foodItems = [...fObj.acc];
             foodItems.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
@@ -576,7 +601,7 @@
             });
         });
 
-        // 3. その他の一般共通装備・顧問装備は全メンバーで分配
+        // 3. その他の一般共通装備・顧問装備の分配
         generalPending.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
         generalPending.forEach(item => {
             allM.sort((a,b) => {
@@ -584,9 +609,17 @@
                 let sB = (b.w / b.ratio) + (b.v / b.ratio * 0.2);
                 return sA - sB;
             });
-            allM[0].items.push(item);
-            allM[0].w += item.w;
-            allM[0].v += item.v;
+
+            let target = allM[0];
+            // 【ルール追加】テント本体を持つ人には「ツェルト」「修理具」「医薬品」を持たせない
+            let isRestricted = item.name.includes('ツェルト') || item.name.includes('修理具') || item.name.includes('医薬品');
+            if (isRestricted) {
+                target = allM.find(m => !m.hasTentBody) || allM[0];
+            }
+
+            target.items.push(item);
+            target.w += item.w;
+            target.v += item.v;
         });
 
         // --- 描画 ---
