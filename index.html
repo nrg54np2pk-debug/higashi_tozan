@@ -3,648 +3,673 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登山部 分担ツール</title>
+    <title>🏔️ 登山部 分担ツール</title>
     <style>
+        /* --- 全体のデザイン --- */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-color: #e0e6ed;
+        }
         body {
-            font-family: sans-serif;
-            background-color: #f4f6f8;
-            color: #333;
+            font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 10px;
+            padding: 15px 10px;
         }
         .container {
-            max-width: 950px;
+            max-width: 900px;
             margin: 0 auto;
-            background: #fff;
-            padding: 12px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
-        h1, h2 {
-            color: #2c3e50;
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            margin-top: 0;
+            text-align: center;
+            border-bottom: 2px solid var(--accent-color);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: var(--primary-color);
             font-size: 1.1rem;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
-            gap: 5px;
+            background: #f8fafc;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 5px solid var(--accent-color);
+            margin-top: 25px;
         }
-        h1 { font-size: 1.3rem; margin-top: 0; }
+        
+        /* --- 入力エリア --- */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
         .form-group {
-            margin-bottom: 8px;
-            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.95rem;
         }
-        label {
-            display: inline-block;
-            width: 140px;
-            font-weight: bold;
-        }
+        .form-group label { font-weight: bold; }
         input[type="number"], input[type="text"] {
-            padding: 6px;
-            font-size: 1rem;
-        }
-        input[type="number"] { width: 60px; }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.75rem;
-            margin-top: 8px;
-            table-layout: fixed;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 5px 3px;
-            text-align: center;
-            word-break: break-all;
-        }
-        th {
-            background-color: #2c3e50;
-            color: white;
-        }
-        button {
-            background-color: #27ae60;
-            color: white;
-            border: none;
-            padding: 12px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
+            padding: 8px;
+            border: 1px solid #ccc;
             border-radius: 4px;
-            width: 100%;
-            margin-top: 10px;
-            -webkit-tap-highlight-color: transparent;
+            font-size: 1rem;
+            text-align: center;
         }
-        button:active {
-            opacity: 0.8;
-        }
-        .copy-btn {
-            background-color: #2980b9;
-            font-size: 0.75rem;
-            padding: 6px 10px;
-            width: auto;
-            margin-top: 0;
-            border-radius: 3px;
-        }
-        .del-item-btn {
-            background-color: #e74c3c;
-            font-size: 0.7rem;
-            padding: 2px 6px;
-            width: auto;
-            margin-top: 0;
-            border-radius: 3px;
-        }
+        input[type="number"] { width: 50px; }
+
+        /* --- 荷物リスト --- */
         .item-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-            gap: 6px;
-            margin-bottom: 10px;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
         }
         .item-card {
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-            padding: 6px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-left: 4px solid #8e44ad;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .item-card-left {
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .item-details { display: flex; flex-direction: column; gap: 3px; }
+        .item-name { font-weight: bold; color: var(--primary-color); }
+        
+        .item-specs-inputs {
+            display: flex; gap: 8px; margin-top: 6px; align-items: center;
         }
+        .item-specs-inputs label {
+            font-size: 0.8rem; color: var(--text-sub); display: flex; align-items: center; gap: 2px;
+        }
+        .item-specs-inputs input {
+            width: 45px; padding: 4px; font-size: 0.85rem; border: 1px solid #ccc; border-radius: 4px; text-align: center;
+        }
+
+        .item-qty-box { display: flex; align-items: center; gap: 5px; }
+        
+        /* --- 追加フォーム --- */
         .add-item-box {
-            background: #f8f9fa;
-            border: 1px dashed #cbd5e1;
-            padding: 8px;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            background: #eef2f5;
+            padding: 15px;
+            border-radius: 8px;
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             align-items: center;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
-        .add-item-box input[type="text"] { width: 110px; }
-        .add-item-box input[type="number"] { width: 55px; }
-        .add-btn {
-            background-color: #8e44ad;
-            width: auto;
-            padding: 6px 12px;
-            font-size: 0.85rem;
-            margin-top: 0;
+        .add-item-box input[type="text"] { width: 120px; text-align: left; }
+        
+        /* --- ボタン --- */
+        button {
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
-        .section-box {
+        button:active { opacity: 0.7; }
+        .btn-main {
+            background-color: #27ae60;
+            color: white;
+            padding: 15px;
+            font-size: 1.1rem;
+            width: 100%;
             margin-top: 15px;
-            border-top: 2px solid #eee;
-            padding-top: 8px;
+            box-shadow: 0 4px 6px rgba(39, 174, 96, 0.2);
         }
-        .badge-level {
-            display: inline-block;
-            padding: 2px 4px;
+        .btn-add { background-color: #8e44ad; color: white; padding: 8px 15px; }
+        .btn-del { background-color: #e74c3c; color: white; padding: 4px 8px; font-size: 0.75rem; }
+        .btn-copy { background-color: #2980b9; color: white; padding: 6px 12px; font-size: 0.8rem; }
+
+        /* --- テーブル（表） --- */
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 0.85rem;
+            margin-top: 10px;
             border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        th, td {
+            padding: 10px 5px;
+            text-align: center;
+            border-bottom: 1px solid var(--border-color);
+            word-break: break-all;
+        }
+        th { background-color: var(--primary-color); color: white; }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: #f9fbfd; }
+
+        /* --- バッジ --- */
+        .badge {
+            display: inline-block;
+            padding: 3px 6px;
+            border-radius: 12px;
             font-weight: bold;
             color: white;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
+            margin-top: 3px;
         }
-        .lvl-1 { background-color: #3498db; }
-        .lvl-2 { background-color: #2ecc71; }
-        .lvl-3 { background-color: #f1c40f; color: #333; }
-        .lvl-4 { background-color: #e67e22; }
-        .lvl-5 { background-color: #e74c3c; }
+        .bg-blue { background-color: #3498db; }
+        .bg-green { background-color: #2ecc71; }
+        .bg-yellow { background-color: #f1c40f; color: #333; }
+        .bg-orange { background-color: #e67e22; }
+        .bg-red { background-color: #e74c3c; }
+        .bg-vol { background-color: #7f8c8d; }
+
+        /* --- アラート --- */
+        .alert-box {
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        .alert-warning { background-color: #fff3cd; border: 1px solid #ffeeba; color: #856404; }
+        .alert-success { background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+
         .name-inputs-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-            gap: 6px;
-            margin-top: 5px;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 8px;
             margin-bottom: 15px;
         }
         .name-input-item {
-            background: #fafafa;
-            border: 1px solid #e0e0e0;
-            padding: 6px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.8rem;
+            font-weight: bold;
         }
-        .name-input-item input {
-            width: 100px;
-            padding: 4px;
-            font-size: 0.9rem;
-        }
-        .warning-box {
-            background-color: #fff3cd;
-            border: 1px solid #ffeeba;
-            color: #856404;
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
-            font-size: 0.85rem;
-        }
+        .name-input-item input { margin-top: 3px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏔️ 登山部 分担ツール</h1>
+    <h1>🏔️ 登山部 装備・分担計算ツール</h1>
     
-    <h2>1. 参加人数と学年内訳</h2>
-    <div class="form-group">
-        <label for="male2Count">男子2年生数:</label>
-        <input type="number" id="male2Count" value="3" min="0" onchange="updateNameInputs()"> 人
-    </div>
-    <div class="form-group">
-        <label for="male1Count">男子1年生数:</label>
-        <input type="number" id="male1Count" value="3" min="0" onchange="updateNameInputs()"> 人
-    </div>
-    <div class="form-group">
-        <label for="female2Count">女子2年生数:</label>
-        <input type="number" id="female2Count" value="2" min="0" onchange="updateNameInputs()"> 人
-    </div>
-    <div class="form-group">
-        <label for="female1Count">女子1年生数:</label>
-        <input type="number" id="female1Count" value="2" min="0" onchange="updateNameInputs()"> 人
-    </div>
-    <div class="form-group">
-        <label for="teacherCount">顧問の人数:</label>
-        <input type="number" id="teacherCount" value="2" min="0"> 人
+    <h2>1. 基本設定（人数・宿泊数）</h2>
+    <div class="settings-grid">
+        <div class="form-group" style="background:#e8f4f8; border-color:#3498db;">
+            <label style="color:#2980b9;">宿泊数 (泊):</label> 
+            <input type="number" id="nights" value="1" min="0">
+        </div>
+        <div class="form-group"><label>男子2年:</label> <input type="number" id="m2" value="3" min="0" onchange="updateNames()"></div>
+        <div class="form-group"><label>男子1年:</label> <input type="number" id="m1" value="3" min="0" onchange="updateNames()"></div>
+        <div class="form-group"><label>女子2年:</label> <input type="number" id="f2" value="2" min="0" onchange="updateNames()"></div>
+        <div class="form-group"><label>女子1年:</label> <input type="number" id="f1" value="2" min="0" onchange="updateNames()"></div>
+        <div class="form-group"><label>顧問:</label> <input type="number" id="tCount" value="2" min="0"></div>
     </div>
 
-    <h2>2. 部員のお名前入力（任意）</h2>
-    <div id="nameInputsArea" class="name-inputs-grid"></div>
+    <h2>2. 部員の名前（任意）</h2>
+    <div id="namesArea" class="name-inputs-grid"></div>
 
-    <h2>3. 荷物・装備・食糧の設定</h2>
+    <h2>3. 荷物リスト (重さ & 容積指数)</h2>
     <div class="item-list" id="itemList"></div>
 
-    <!-- 荷物の追加フォーム -->
     <div class="add-item-box">
-        <span>➕ <strong>荷物を追加:</strong></span>
+        <strong style="width: 100%;">➕ 新しい装備を追加</strong>
         <input type="text" id="newItemName" placeholder="装備名">
-        <input type="number" id="newItemWeight" placeholder="重さ" step="0.1" min="0.1" value="1.0"> kg
-        <input type="number" id="newItemQty" placeholder="数量" min="1" value="1"> 個
-        <button type="button" class="add-btn" onclick="addNewItem()">リストに追加</button>
+        <label>重さ: <input type="number" id="newItemW" step="0.1" value="1.0"> kg</label>
+        <label>容積: <input type="number" id="newItemV" min="1" max="10" value="5"> /10</label>
+        <label>数: <input type="number" id="newItemQ" min="1" value="1"></label>
+        <button class="btn-add" onclick="addItem()">追加</button>
     </div>
 
-    <button type="button" onclick="calculateBuntan()">班分け＆分担を計算する</button>
+    <button class="btn-main" onclick="calc()">📦 班分け ＆ 分担を計算する</button>
 
-    <div id="warningArea"></div>
+    <div id="alertArea"></div>
 
-    <div class="section-box">
-        <h2>
-            <span>4. テント班</span>
-            <button type="button" class="copy-btn" onclick="copyResult('tent')">コピー</button>
-        </h2>
-        <div id="tentResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
-    </div>
+    <h2>
+        <span>4. テント班</span>
+        <button class="btn-copy" onclick="copyRes('tent')">コピー</button>
+    </h2>
+    <div id="tentArea"><p style="color:#999; text-align:center;">未計算</p></div>
 
-    <div class="section-box">
-        <h2>
-            <span>5. 食事班</span>
-            <button type="button" class="copy-btn" onclick="copyResult('food')">コピー</button>
-        </h2>
-        <div id="foodResultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
-    </div>
+    <h2>
+        <span>5. 食事班</span>
+        <button class="btn-copy" onclick="copyRes('food')">コピー</button>
+    </h2>
+    <div id="foodArea"><p style="color:#999; text-align:center;">未計算</p></div>
 
-    <div class="section-box">
-        <h2>
-            <span>6. 個人別の総重量＆評価</span>
-            <button type="button" class="copy-btn" onclick="copyResult('member')">コピー</button>
-        </h2>
-        <div id="resultArea"><p style="font-size: 0.85rem; color:#777;">未計算</p></div>
-    </div>
+    <h2>
+        <span>6. 個人別の総重量 ＆ 容積（出発時点）</span>
+        <button class="btn-copy" onclick="copyRes('member')">コピー</button>
+    </h2>
+    <div id="resArea"><p style="color:#999; text-align:center;">未計算</p></div>
 </div>
 
 <script>
     let customItems = [
-        { id: 'repair', name: '修理具', weight: 0.1, qty: 1, unit: '個', isCustom: false },
-        { id: 'rope', name: '補助ロープ', weight: 1.5, qty: 1, unit: '個', isCustom: false },
-        { id: 'zelt', name: 'ツェルト', weight: 0.5, qty: 1, unit: '個', isCustom: false },
-        { id: 'med', name: '医薬品', weight: 1.0, qty: 1, unit: '個', isCustom: false },
-        { id: 'radio', name: 'ラジオ用紙', weight: 0.6, qty: 1, unit: '個', isCustom: false },
-        { id: 'foodBreakfast', name: '食糧 朝 (1班)', weight: 1.0, qty: 1, isFood: true, unit: 'kg', isCustom: false },
-        { id: 'foodDinner', name: '食糧 夜 (1班)', weight: 2.5, qty: 1, isFood: true, unit: 'kg', isCustom: false }
+        { id: 'rope', name: '補助ロープ', weight: 1.5, vol: 5, qty: 1, isFood: false },
+        { id: 'zelt', name: 'ツェルト', weight: 0.5, vol: 2, qty: 1, isFood: false },
+        { id: 'med', name: '医薬品', weight: 1.0, vol: 5, qty: 1, isFood: false },
+        { id: 'radio', name: 'ラジオ用紙', weight: 0.6, vol: 2, qty: 1, isFood: false },
+        { id: 'repair', name: '修理具', weight: 0.1, vol: 1, qty: 1, isFood: false },
+        { id: 'fb', name: '1食分:朝食', weight: 1.0, vol: 6, qty: 1, isFood: true },
+        { id: 'fd', name: '1食分:夕食', weight: 2.5, vol: 6, qty: 1, isFood: true }
     ];
 
-    let lastTentGroups = [];
-    let lastFoodGroups = [];
-    let lastAllMembers = [];
+    let g_tents = [], g_foods = [], g_members = [];
 
-    function initUI() {
-        renderItemList();
-        updateNameInputs();
-    }
+    function init() { renderItems(); updateNames(); }
 
-    function renderItemList() {
-        const listDiv = document.getElementById('itemList');
-        if (!listDiv) return;
-        listDiv.innerHTML = '';
-
-        customItems.forEach((item, index) => {
-            const div = document.createElement('div');
-            div.className = 'item-card';
-            div.innerHTML = `
-                <div class="item-card-left">
-                    <span>${item.name} (${item.weight}kg)</span>
-                    <input type="number" id="item_qty_${index}" value="${item.qty}" min="0" step="${item.isFood ? '0.1' : '1'}" style="width:50px; padding:3px;">
+    function renderItems() {
+        const div = document.getElementById('itemList');
+        div.innerHTML = '';
+        customItems.forEach((it, i) => {
+            div.innerHTML += `
+                <div class="item-card">
+                    <div class="item-details">
+                        <span class="item-name">${it.name}</span>
+                        <div class="item-specs-inputs">
+                            <label>⚖️ <input type="number" id="weight_${i}" value="${it.weight}" step="0.1" min="0">kg</label>
+                            <label>📦 <input type="number" id="vol_${i}" value="${it.vol}" step="1" min="0"></label>
+                        </div>
+                    </div>
+                    <div class="item-qty-box">
+                        ${it.isFood ? 
+                            `<span style="font-size:0.75rem; font-weight:bold; color:#e67e22; text-align:center;">※個数は<br>泊数連動</span>` : 
+                            `<input type="number" id="qty_${i}" value="${it.qty}" step="1" min="0" style="width:40px;">
+                             ${it.id.startsWith('c_') ? `<button class="btn-del" onclick="delItem(${i})">削除</button>` : `<span style="font-size:0.8rem; color:#999;">個</span>`}`
+                        }
+                    </div>
                 </div>
-                ${item.isCustom ? `<button type="button" class="del-item-btn" onclick="removeCustomItem(${index})">削除</button>` : `<span style="font-size:0.75rem; color:#777;">${item.unit}</span>`}
             `;
-            listDiv.appendChild(div);
         });
     }
 
-    function addNewItem() {
-        const nameInput = document.getElementById('newItemName');
-        const weightInput = document.getElementById('newItemWeight');
-        const qtyInput = document.getElementById('newItemQty');
-
-        const name = nameInput.value.trim();
-        const weight = parseFloat(weightInput.value);
-        const qty = parseFloat(qtyInput.value);
-
-        if (!name) {
-            alert('⚠️ 装備名を入力してください。');
-            return;
-        }
-        if (isNaN(weight) || weight <= 0) {
-            alert('⚠️ 正しい重さ（kg）を入力してください。');
-            return;
-        }
-        if (isNaN(qty) || qty < 0) {
-            alert('⚠️ 正しい数量を入力してください。');
-            return;
-        }
-
-        customItems.push({
-            id: 'custom_' + Date.now(),
-            name: name,
-            weight: weight,
-            qty: qty,
-            unit: '個',
-            isCustom: true
-        });
-
-        nameInput.value = '';
-        renderItemList();
-    }
-
-    function removeCustomItem(index) {
-        customItems.splice(index, 1);
-        renderItemList();
-    }
-
-    function updateNameInputs() {
-        const area = document.getElementById('nameInputsArea');
-        if (!area) return;
-
-        const m2 = parseInt(document.getElementById('male2Count').value) || 0;
-        const m1 = parseInt(document.getElementById('male1Count').value) || 0;
-        const f2 = parseInt(document.getElementById('female2Count').value) || 0;
-        const f1 = parseInt(document.getElementById('female1Count').value) || 0;
-
-        let existingValues = {};
-        area.querySelectorAll('input').forEach(input => {
-            existingValues[input.id] = input.value;
-        });
-
-        let html = '';
-        function makeInputs(count, grade, gender, labelPrefix) {
-            for (let i = 1; i <= count; i++) {
-                let id = `name_${gender}_${grade}_${i}`;
-                let val = existingValues[id] || '';
-                html += `<div class="name-input-item">
-                    <label style="width:70px; font-weight:normal;">${labelPrefix}(${i}):</label>
-                    <input type="text" id="${id}" value="${val}" placeholder="自動">
-                </div>`;
-            }
-        }
-
-        makeInputs(m1, 1, 'male', '男子1年');
-        makeInputs(m2, 2, 'male', '男子2年');
-        makeInputs(f1, 1, 'female', '女子1年');
-        makeInputs(f2, 2, 'female', '女子2年');
-
-        area.innerHTML = html || '<p style="color:#777; font-size:0.8rem; margin:0;">部員が設定されていません</p>';
-    }
-
-    function getLevel(weight) {
-        if (weight >= 5.0) return 5;
-        if (weight >= 4.0) return 4;
-        if (weight >= 3.0) return 3;
-        if (weight >= 2.0) return 2;
-        return 1;
-    }
-
-    function calculateBuntan() {
-        const m2 = parseInt(document.getElementById('male2Count').value);
-        const m1 = parseInt(document.getElementById('male1Count').value);
-        const f2 = parseInt(document.getElementById('female2Count').value);
-        const f1 = parseInt(document.getElementById('female1Count').value);
-        const teacherCount = parseInt(document.getElementById('teacherCount').value);
-
-        if (isNaN(m2) || isNaN(m1) || isNaN(f2) || isNaN(f1) || isNaN(teacherCount) ||
-            m2 < 0 || m1 < 0 || f2 < 0 || f1 < 0 || teacherCount < 0) {
-            alert('⚠️ 人数欄には0以上の正しい数値を入力してください。');
-            return;
-        }
-
-        const totalMembers = m2 + m1 + f2 + f1;
-        if (totalMembers === 0) {
-            alert('⚠️ 部員（生徒）が1人も設定されていません。');
-            return;
-        }
-
-        customItems.forEach((item, index) => {
-            const inputEl = document.getElementById(`item_qty_${index}`);
-            if (inputEl) {
-                item.qty = parseFloat(inputEl.value) || 0;
-            }
-        });
-
-        let males2 = [], males1 = [], females2 = [], females1 = [];
+    function addItem() {
+        const n = document.getElementById('newItemName').value.trim();
+        const w = parseFloat(document.getElementById('newItemW').value);
+        const v = parseInt(document.getElementById('newItemV').value);
+        const q = parseFloat(document.getElementById('newItemQ').value);
         
-        for (let i = 1; i <= m1; i++) {
-            let customName = document.getElementById(`name_male_1_${i}`)?.value.trim();
-            males1.push({ id: `M1_${i}`, name: customName ? customName : `男子1年(${i})`, grade: 1, gender: 'male', ratio: 0.9, items: [], totalWeight: 0 });
-        }
-        for (let i = 1; i <= m2; i++) {
-            let customName = document.getElementById(`name_male_2_${i}`)?.value.trim();
-            males2.push({ id: `M2_${i}`, name: customName ? customName : `男子2年(${i})`, grade: 2, gender: 'male', ratio: 1.0, items: [], totalWeight: 0 });
-        }
-        for (let i = 1; i <= f1; i++) {
-            let customName = document.getElementById(`name_female_1_${i}`)?.value.trim();
-            females1.push({ id: `F1_${i}`, name: customName ? customName : `女子1年(${i})`, grade: 1, gender: 'female', ratio: 0.54, items: [], totalWeight: 0 });
-        }
-        for (let i = 1; i <= f2; i++) {
-            let customName = document.getElementById(`name_female_2_${i}`)?.value.trim();
-            females2.push({ id: `F2_${i}`, name: customName ? customName : `女子2年(${i})`, grade: 2, gender: 'female', ratio: 0.6, items: [], totalWeight: 0 });
-        }
+        if (!n || isNaN(w) || isNaN(v) || isNaN(q)) return alert('正しく入力してください');
+        customItems.push({ id: 'c_'+Date.now(), name: n, weight: w, vol: v, qty: q, isFood: false });
+        document.getElementById('newItemName').value = '';
+        renderItems();
+    }
+    function delItem(i) { customItems.splice(i,1); renderItems(); }
 
-        let allMembers = [...males1, ...males2, ...females1, ...females2];
-        lastAllMembers = allMembers;
+    function updateNames() {
+        const area = document.getElementById('namesArea');
+        const vals = {}; area.querySelectorAll('input').forEach(inp => vals[inp.id] = inp.value);
+        
+        let html = '';
+        const make = (c, g, sx, lbl) => {
+            for(let i=1; i<=c; i++) {
+                let id = `n_${sx}_${g}_${i}`;
+                html += `<div class="name-input-item">${lbl}(${i}) <input type="text" id="${id}" value="${vals[id]||''}" placeholder="名前"></div>`;
+            }
+        };
+        make(document.getElementById('m1').value, 1, 'm', '男子1年');
+        make(document.getElementById('m2').value, 2, 'm', '男子2年');
+        make(document.getElementById('f1').value, 1, 'f', '女子1年');
+        make(document.getElementById('f2').value, 2, 'f', '女子2年');
+        area.innerHTML = html;
+    }
 
-        let tentGroups = [];
-        let tentCount = 0;
+    function calc() {
+        const nights = parseInt(document.getElementById('nights').value)||0;
+        const m2 = parseInt(document.getElementById('m2').value)||0;
+        const m1 = parseInt(document.getElementById('m1').value)||0;
+        const f2 = parseInt(document.getElementById('f2').value)||0;
+        const f1 = parseInt(document.getElementById('f1').value)||0;
+        const tc = parseInt(document.getElementById('tCount').value)||0;
+        const tot = m2+m1+f2+f1;
+        if(tot === 0) return alert('部員がいません');
 
-        function makeTentGroups(grade2List, grade1List, genderLabel) {
-            let pool2 = [...grade2List];
-            let pool1 = [...grade1List];
+        // 画面の数値を反映
+        customItems.forEach((it, i) => {
+            let qInput = document.getElementById(`qty_${i}`);
+            if(qInput) it.qty = parseFloat(qInput.value) || 0;
+            let wInput = document.getElementById(`weight_${i}`);
+            if(wInput) it.weight = parseFloat(wInput.value) || 0;
+            let vInput = document.getElementById(`vol_${i}`);
+            if(vInput) it.vol = parseFloat(vInput.value) || 0;
+        });
 
-            while (pool2.length > 0 || pool1.length > 0) {
-                let currentGroup = [];
-                if (pool2.length > 0) currentGroup.push(pool2.shift());
+        // メンバー作成
+        let m2L=[], m1L=[], f2L=[], f1L=[];
+        const getN = (id, def) => document.getElementById(id)?.value.trim() || def;
+        for(let i=1;i<=m1;i++) m1L.push({ name: getN(`n_m_1_${i}`,`男子1年(${i})`), gr:1, sx:'m', ratio:0.9, items:[], w:0, v:0, tentName:'', foodName:'' });
+        for(let i=1;i<=m2;i++) m2L.push({ name: getN(`n_m_2_${i}`,`男子2年(${i})`), gr:2, sx:'m', ratio:1.0, items:[], w:0, v:0, tentName:'', foodName:'' });
+        for(let i=1;i<=f1;i++) f1L.push({ name: getN(`n_f_1_${i}`,`女子1年(${i})`), gr:1, sx:'f', ratio:0.65, items:[], w:0, v:0, tentName:'', foodName:'' });
+        for(let i=1;i<=f2;i++) f2L.push({ name: getN(`n_f_2_${i}`,`女子2年(${i})`), gr:2, sx:'f', ratio:0.6, items:[], w:0, v:0, tentName:'', foodName:'' });
+        
+        let allM = [...m1L, ...m2L, ...f1L, ...f2L];
+        g_members = allM;
 
-                let targetSize = 4;
-                let remainingTotal = pool2.length + pool1.length + currentGroup.length;
-                if (remainingTotal === 3 || remainingTotal === 7) targetSize = 3;
-
-                while (currentGroup.length < targetSize && (pool2.length > 0 || pool1.length > 0)) {
-                    if (pool2.length > 0 && (currentGroup.length < 2 || pool1.length === 0)) {
-                        currentGroup.push(pool2.shift());
-                    } else if (pool1.length > 0) {
-                        currentGroup.push(pool1.shift());
-                    } else if (pool2.length > 0) {
-                        currentGroup.push(pool2.shift());
+        // --- テント班 ---
+        let tents = [], tCnt = 0;
+        if(nights > 0) {
+            if(m2+m1 > 0) {
+                let p2 = [...m2L], p1 = [...m1L];
+                while(p2.length > 0) {
+                    let grp = [];
+                    let rem = p2.length + p1.length;
+                    let size = (rem === 3 || rem === 7) ? 3 : 4;
+                    while(grp.length < size && p2.length > 0) {
+                        let member = p2.shift();
+                        grp.push(member);
                     }
+                    tCnt++;
+                    let tName = 'v6テント';
+                    let tW = 3.1, tV = 10;
+                    let tentObjName = `テント${tCnt}`;
+                    grp.forEach(m => m.tentName = tentObjName);
+
+                    tents.push({
+                        name: tentObjName,
+                        tName: tName,
+                        m: grp,
+                        acc: [
+                            { name: `${tName}本体(${tentObjName})`, w: tW, v: tV, tentName: tentObjName },
+                            { name: `${tName}ポール(${tentObjName})`, w: 0.65, v: 4, tentName: tentObjName },
+                            { name: `${tName}ペグ(${tentObjName})`, w: 0.63, v: 2, tentName: tentObjName },
+                            { name: `${tName}ハンマー(${tentObjName})`, w: 0.5, v: 2, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName }
+                        ]
+                    });
                 }
 
-                tentCount++;
-                let tentName = currentGroup.length === 4 ? 'v6テント' : 'エスパーステント';
-                let tentWeight = currentGroup.length === 4 ? 3.1 : 2.0;
+                let ESP_LIMIT = 2; 
+                let espCount = 0;
+                while(p1.length > 0) {
+                    let grp = [];
+                    let rem = p1.length;
+                    let size = (rem === 3) ? 3 : 4;
+                    while(grp.length < size && p1.length > 0) {
+                        grp.push(p1.shift());
+                    }
+                    tCnt++;
+                    espCount++;
+                    let tName = (espCount <= ESP_LIMIT) ? 'エスパース' : 'アライ';
+                    let tW = 2.0, tV = 8;
+                    let tentObjName = `テント${tCnt}`;
+                    grp.forEach(m => m.tentName = tentObjName);
+                    
+                    tents.push({
+                        name: tentObjName,
+                        tName: tName,
+                        m: grp,
+                        acc: [
+                            { name: `${tName}本体(${tentObjName})`, w: tW, v: tV, tentName: tentObjName },
+                            { name: `${tName}ポール(${tentObjName})`, w: 0.65, v: 4, tentName: tentObjName },
+                            { name: `${tName}ペグ(${tentObjName})`, w: 0.63, v: 2, tentName: tentObjName },
+                            { name: `${tName}ハンマー(${tentObjName})`, w: 0.5, v: 2, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName }
+                        ]
+                    });
+                }
+            }
 
-                let leader2Year = currentGroup.find(m => m.grade === 2) || currentGroup[0];
-                let tentBodyGear = { name: tentName, weight: tentWeight };
-                leader2Year.items.push(tentBodyGear);
-                leader2Year.totalWeight += tentBodyGear.weight;
+            if(f2+f1 > 0) {
+                let p2 = [...f2L], p1 = [...f1L];
+                while(p2.length > 0 || p1.length > 0) {
+                    let grp = [];
+                    if(p2.length > 0) grp.push(p2.shift());
+                    let rem = p2.length + p1.length + grp.length;
+                    let size = (rem === 3 || rem === 7) ? 3 : 4;
+                    while(grp.length < size && (p2.length > 0 || p1.length > 0)) {
+                        if(p2.length > 0 && (grp.length < 2 || p1.length === 0)) grp.push(p2.shift());
+                        else if(p1.length > 0) grp.push(p1.shift());
+                        else grp.push(p2.shift());
+                    }
+                    tCnt++;
+                    let tName = grp.length === 4 ? 'v6テント' : 'エスパース';
+                    let tW = grp.length === 4 ? 3.1 : 2.0;
+                    let tV = grp.length === 4 ? 10 : 8; 
+                    let tentObjName = `テント${tCnt}`;
+                    grp.forEach(m => m.tentName = tentObjName);
+                    
+                    tents.push({
+                        name: tentObjName,
+                        tName: tName,
+                        m: grp,
+                        acc: [
+                            { name: `${tName}本体(${tentObjName})`, w: tW, v: tV, tentName: tentObjName },
+                            { name: `${tName}ポール(${tentObjName})`, w: 0.65, v: 4, tentName: tentObjName },
+                            { name: `${tName}ペグ(${tentObjName})`, w: 0.63, v: 2, tentName: tentObjName },
+                            { name: `${tName}ハンマー(${tentObjName})`, w: 0.5, v: 2, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName },
+                            { name: `銀マット(${tentObjName})`, w: 0.2, v: 8, tentName: tentObjName }
+                        ]
+                    });
+                }
+            }
+        }
+        g_tents = tents;
 
-                let tentAccessories = [
-                    { name: 'ポール', weight: 0.65 },
-                    { name: 'ペグ', weight: 0.63 },
-                    { name: 'ハンマー', weight: 0.5 },
-                    { name: '銀マット', weight: 0.2 },
-                    { name: '銀マット', weight: 0.2 }
+        // --- 食事班 ---
+        let foods = [];
+        if(nights > 0) {
+            let numG = Math.max(1, Math.ceil(tot/5));
+            for(let i=0; i<numG; i++) foods.push({name: `食事班${i+1}`, m:[], acc:[], tw:0, tv:0});
+            
+            let fPool = [...f2L, ...f1L], mPool = [...m2L, ...m1L];
+            let gIdx = 0;
+            while(fPool.length>0) { foods[gIdx].m.push(fPool.shift()); gIdx=(gIdx+1)%numG; }
+            while(mPool.length>0) {
+                if(foods[gIdx].m.length >= 6) { gIdx=(gIdx+1)%numG; continue; }
+                foods[gIdx].m.push(mPool.shift());
+                gIdx=(gIdx+1)%numG;
+            }
+
+            foods.forEach((fg, idx) => {
+                fg.m.forEach(m => m.foodName = fg.name);
+            });
+
+            const bW = customItems.find(i=>i.id==='fb')?.weight||0;
+            const bV = customItems.find(i=>i.id==='fb')?.vol||0;
+            const dW = customItems.find(i=>i.id==='fd')?.weight||0;
+            const dV = customItems.find(i=>i.id==='fd')?.vol||0;
+
+            foods.forEach((fg, idx) => {
+                let foodObjName = fg.name;
+                let set = [
+                    { name:`シート(${foodObjName})`, w:0.15, v:1, foodName: foodObjName },
+                    { name:`コッフェル(${foodObjName})`, w:0.5, v:6, foodName: foodObjName },
+                    { name:`調理器具(${foodObjName})`, w:0.25, v:2, foodName: foodObjName },
+                    { name:`ガスヘッド(${foodObjName})`, w:0.1, v:1, foodName: foodObjName },
+                    { name:`ガスヘッド(${foodObjName})`, w:0.1, v:1, foodName: foodObjName },
+                    { name:`ガス缶(${foodObjName})`, w:0.3, v:2, foodName: foodObjName },
+                    { name:`ガス缶(${foodObjName})`, w:0.3, v:2, foodName: foodObjName },
+                    { name:`ガス缶(${foodObjName})`, w:0.3, v:2, foodName: foodObjName }
                 ];
+                
+                for(let n=1; n<=nights; n++) {
+                    if(dW > 0) set.push({name:`${n}日目夜(${foodObjName})`, w:dW, v:dV, foodName: foodObjName});
+                    if(bW > 0) set.push({name:`${n+1}日目朝(${foodObjName})`, w:bW, v:bV, foodName: foodObjName});
+                }
 
-                tentGroups.push({
-                    groupName: `${genderLabel}テント${tentCount}`,
-                    tentType: tentName,
-                    members: currentGroup,
-                    accessories: tentAccessories
+                fg.acc = set;
+                fg.tw = set.reduce((s,i)=>s+i.w, 0);
+                fg.tv = set.reduce((s,i)=>s+i.v, 0);
+            });
+        }
+        g_foods = foods;
+
+        // --- 共通装備の収集と分配（テント・食事の所属一致ロジック） ---
+        let generalPending = [];
+        customItems.forEach(it => {
+            if(it.isFood) return;
+            for(let i=0; i<it.qty; i++) generalPending.push({name: it.name, w: it.weight, v: it.vol});
+        });
+        if(nights > 0) {
+            for(let t=0; t<Math.ceil(tc/2); t++) {
+                generalPending.push(
+                    { name:'顧問テント', w:2.0, v:8 },
+                    { name:'顧問ポール', w:0.65, v:4 },
+                    { name:'顧問ペグ', w:0.63, v:2 },
+                    { name:'顧問マット', w:0.4, v:8 }
+                );
+            }
+        }
+
+        // 1. テント関係物は「同じテント班のメンバー」にのみ割り当てる
+        tents.forEach(tObj => {
+            let tentItems = [...tObj.acc];
+            tentItems.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
+
+            tentItems.forEach(item => {
+                let membersInTent = tObj.m;
+                membersInTent.sort((a,b) => {
+                    let sA = (a.w / a.ratio) + (a.v / a.ratio * 0.2);
+                    let sB = (b.w / b.ratio) + (b.v / b.ratio * 0.2);
+                    return sA - sB;
                 });
-            }
-        }
-
-        if (males2.length > 0 || males1.length > 0) makeTentGroups(males2, males1, '男子');
-        if (females2.length > 0 || females1.length > 0) makeTentGroups(females2, females1, '女子');
-        lastTentGroups = tentGroups;
-
-        let foodGroups = [];
-        let poolM2 = [...males2], poolM1 = [...males1], poolF2 = [...females2], poolF1 = [...females1];
-        let totalNumGroups = Math.ceil(totalMembers / 5);
-        if (totalNumGroups < 1) totalNumGroups = 1;
-
-        for (let i = 0; i < totalNumGroups; i++) {
-            foodGroups.push({ groupName: `食事班${i + 1}`, members: [], gearSet: [] });
-        }
-
-        let groupIdx = 0;
-        while ((poolF2.length > 0 || poolF1.length > 0) && groupIdx < totalNumGroups) {
-            let fMember = poolF2.length > 0 ? poolF2.shift() : poolF1.shift();
-            foodGroups[groupIdx].members.push(fMember);
-            groupIdx = (groupIdx + 1) % totalNumGroups;
-        }
-
-        let allRemainingPool = [...poolM2, ...poolF2, ...poolM1, ...poolF1];
-        allRemainingPool.sort((a, b) => b.grade - a.grade);
-
-        groupIdx = 0;
-        while (allRemainingPool.length > 0) {
-            while (foodGroups[groupIdx].members.length >= 6 || (foodGroups[groupIdx].members.length >= 5 && allRemainingPool.length + foodGroups.reduce((s, g) => s + g.members.length, 0) > totalNumGroups * 5)) {
-                groupIdx = (groupIdx + 1) % totalNumGroups;
-            }
-            foodGroups[groupIdx].members.push(allRemainingPool.shift());
-            groupIdx = (groupIdx + 1) % totalNumGroups;
-        }
-
-        const bfastItem = customItems.find(i => i.id === 'foodBreakfast');
-        const dinnerItem = customItems.find(i => i.id === 'foodDinner');
-        const bfastGroupWeight = bfastItem ? bfastItem.qty : 0;
-        const dinnerGroupWeight = dinnerItem ? dinnerItem.qty : 0;
-
-        foodGroups.forEach(fg => {
-            let foodGearSet = [
-                { name: 'シート', weight: 0.15 },
-                { name: 'コッフェル', weight: 0.5 },
-                { name: '調理器具', weight: 0.25 },
-                { name: 'ガスヘッド', weight: 0.1 },
-                { name: 'ガスヘッド', weight: 0.1 },
-                { name: 'ガス缶', weight: 0.3 },
-                { name: 'ガス缶', weight: 0.3 },
-                { name: 'ガス缶', weight: 0.3 }
-            ];
-            if (bfastGroupWeight > 0) foodGearSet.push({ name: '食糧朝', weight: bfastGroupWeight });
-            if (dinnerGroupWeight > 0) foodGearSet.push({ name: '食糧夜', weight: dinnerGroupWeight });
-            fg.gearSet = foodGearSet;
-            fg.totalWeight = foodGearSet.reduce((sum, item) => sum + item.weight, 0);
-        });
-        lastFoodGroups = foodGroups;
-
-        let allPendingItems = [];
-        tentGroups.forEach(tg => allPendingItems.push(...tg.accessories));
-
-        let teacherTentSetsCount = Math.ceil(teacherCount / 2);
-        for (let t = 0; t < teacherTentSetsCount; t++) {
-            allPendingItems.push(
-                { name: '顧問テント', weight: 2.0 },
-                { name: '顧問ポール', weight: 0.65 },
-                { name: '顧問ペグ', weight: 0.63 },
-                { name: '顧問マット', weight: 0.4 }
-            );
-        }
-
-        foodGroups.forEach(fg => allPendingItems.push(...fg.gearSet));
-
-        customItems.forEach(item => {
-            if (item.isFood) return;
-            for (let i = 0; i < item.qty; i++) {
-                allPendingItems.push({ name: item.name, weight: item.weight });
-            }
+                membersInTent[0].items.push(item);
+                membersInTent[0].w += item.w;
+                membersInTent[0].v += item.v;
+            });
         });
 
-        allPendingItems.sort((a, b) => b.weight - a.weight);
+        // 2. 食事関係物は「同じ食事班のメンバー」にのみ割り当てる
+        foods.forEach(fObj => {
+            let foodItems = [...fObj.acc];
+            foodItems.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
 
-        allPendingItems.forEach(gear => {
-            allMembers.sort((a, b) => (a.totalWeight / a.ratio) - (b.totalWeight / b.ratio));
-            allMembers[0].items.push(gear);
-            allMembers[0].totalWeight += gear.weight;
+            foodItems.forEach(item => {
+                let membersInFood = fObj.m;
+                membersInFood.sort((a,b) => {
+                    let sA = (a.w / a.ratio) + (a.v / a.ratio * 0.2);
+                    let sB = (b.w / b.ratio) + (b.v / b.ratio * 0.2);
+                    return sA - sB;
+                });
+                membersInFood[0].items.push(item);
+                membersInFood[0].w += item.w;
+                membersInFood[0].v += item.v;
+            });
         });
 
-        let warnings = [];
-        let heavyMembers = allMembers.filter(m => m.totalWeight >= 4.0);
-        if (heavyMembers.length > 0) {
-            let names = heavyMembers.map(m => `${m.name}(${m.totalWeight.toFixed(1)}kg)`).join(', ');
-            warnings.push(`⚠️ 負担重量4kg以上の部員がいます：${names}`);
-        }
+        // 3. その他の一般共通装備・顧問装備は全メンバーで分配
+        generalPending.sort((a,b) => (b.w + b.v*0.2) - (a.w + a.v*0.2));
+        generalPending.forEach(item => {
+            allM.sort((a,b) => {
+                let sA = (a.w / a.ratio) + (a.v / a.ratio * 0.2);
+                let sB = (b.w / b.ratio) + (b.v / b.ratio * 0.2);
+                return sA - sB;
+            });
+            allM[0].items.push(item);
+            allM[0].w += item.w;
+            allM[0].v += item.v;
+        });
 
-        let warningHtml = '';
-        if (warnings.length > 0) {
-            warningHtml = `<div class="warning-box"><strong>【注意】</strong><br>` + warnings.join('<br>') + `</div>`;
+        // --- 描画 ---
+        let warns = allM.filter(m => (m.w / m.ratio) >= 4.5 || m.v >= 18);
+        if(warns.length > 0) {
+            let t = warns.map(m => `${m.name}(${m.w.toFixed(1)}kg)`).join(', ');
+            document.getElementById('alertArea').innerHTML = `<div class="alert-box alert-warning">⚠️ 出発時の負担が大きめの部員がいます: ${t}</div>`;
         } else {
-            warningHtml = `<div class="warning-box" style="background-color:#d4edda; border-color:#c3e6cb; color:#155724;">✅ 偏りや過負荷は見つかりませんでした。</div>`;
+            document.getElementById('alertArea').innerHTML = `<div class="alert-box alert-success">✅ 出発時の体力比に応じた負担バランスは良好です。</div>`;
         }
-        document.getElementById('warningArea').innerHTML = warningHtml;
 
-        let tentHtml = `<table>
-            <colgroup><col style="width: 25%;"><col style="width: 25%;"><col style="width: 50%;"></colgroup>
-            <tr><th>班名</th><th>テント</th><th>メンバー</th></tr>`;
-        tentGroups.forEach(tg => {
-            let mNames = tg.members.map(m => m.name).join(', ');
-            tentHtml += `<tr><td><strong>${tg.groupName}</strong></td><td>${tg.tentType}</td><td style="text-align: left;">${mNames}</td></tr>`;
-        });
-        tentHtml += `</table>`;
-        document.getElementById('tentResultArea').innerHTML = tentHtml;
+        if(nights > 0 && tents.length > 0) {
+            let hT = `<table><tr><th>班名</th><th>テント</th><th>メンバー</th></tr>`;
+            tents.forEach(t => hT += `<tr><td><strong>${t.name}</strong></td><td>${t.tName}</td><td style="text-align:left">${t.m.map(m=>m.name).join(', ')}</td></tr>`);
+            document.getElementById('tentArea').innerHTML = hT + `</table>`;
+        } else {
+            document.getElementById('tentArea').innerHTML = `<p style="color:#999; text-align:center;">宿泊なし（日帰り）のためテント班はありません</p>`;
+        }
 
-        let foodHtml = `<table>
-            <colgroup><col style="width: 25%;"><col style="width: 15%;"><col style="width: 20%;"><col style="width: 40%;"></colgroup>
-            <tr><th>班名</th><th>人数</th><th>合計</th><th>メンバー</th></tr>`;
-        foodGroups.forEach(fg => {
-            let mNames = fg.members.map(m => m.name).join(', ');
-            foodHtml += `<tr><td><strong>${fg.groupName}</strong></td><td>${fg.members.length}人</td><td><strong>${fg.totalWeight.toFixed(1)}kg</strong></td><td style="text-align: left;">${mNames}</td></tr>`;
-        });
-        foodHtml += `</table>`;
-        document.getElementById('foodResultArea').innerHTML = foodHtml;
+        if(nights > 0 && foods.length > 0) {
+            let hF = `<table><tr><th>班名</th><th>出発時の食糧＋装備 総重量(容積)</th><th>メンバー</th></tr>`;
+            foods.forEach(f => hF += `<tr><td><strong>${f.name}</strong></td><td>${f.tw.toFixed(1)}kg<br>(容積${f.tv})</td><td style="text-align:left">${f.m.map(m=>m.name).join(', ')}</td></tr>`);
+            document.getElementById('foodArea').innerHTML = hF + `</table>`;
+        } else {
+            document.getElementById('foodArea').innerHTML = `<p style="color:#999; text-align:center;">宿泊なし（日帰り）のため食事班はありません</p>`;
+        }
 
-        let resHtml = `<table>
-            <colgroup><col style="width: 22%;"><col style="width: 12%;"><col style="width: 42%;"><col style="width: 24%;"></colgroup>
-            <tr><th>名前</th><th>係数</th><th>担当装備</th><th>合計/評価</th></tr>`;
-        allMembers.forEach(m => {
-            const itemNames = m.items.map(i => `${i.name}(${i.weight}kg)`).join(', ');
-            const lvl = getLevel(m.totalWeight);
-            resHtml += `<tr>
-                <td><strong>${m.name}</strong></td>
-                <td>${m.ratio}</td>
-                <td style="text-align: left;">${itemNames || '（なし）'}</td>
-                <td><strong>${m.totalWeight.toFixed(1)}kg</strong><br><span class="badge-level lvl-${lvl}">Lv.${lvl}</span></td>
+        let hM = `<table>
+            <colgroup><col width="25%"><col width="45%"><col width="30%"></colgroup>
+            <tr><th>名前 / 所属班</th><th>担当装備（出発時）</th><th>出発時の合計重量/容積</th></tr>`;
+        allM.forEach(m => {
+            let itms = m.items.map(i=>`${i.name}`).join(', ');
+            let c = 'bg-blue';
+            let relativeBurden = m.w / m.ratio; 
+            if(relativeBurden>=4.5) c='bg-red'; else if(relativeBurden>=3.5) c='bg-orange'; else if(relativeBurden>=2.0) c='bg-green';
+            
+            let aff = [];
+            if(m.tentName) aff.push(m.tentName);
+            if(m.foodName) aff.push(m.foodName);
+            let affStr = aff.length > 0 ? aff.join(' / ') : '日帰り';
+
+            hM += `<tr>
+                <td>
+                    <strong>${m.name}</strong><br>
+                    <span style="font-size:0.75rem; color:#2980b9; font-weight:bold;">[${affStr}]</span><br>
+                    <span style="font-size:0.7rem; color:#777;">(体力係数:${m.ratio})</span>
+                </td>
+                <td style="text-align:left; font-size:0.8rem; color:#555;">${itms||'なし'}</td>
+                <td>
+                    <strong>${m.w.toFixed(1)}kg</strong><br>
+                    <span class="badge ${c}">負担Lv.${relativeBurden>=4.5?5:relativeBurden>=3.5?4:relativeBurden>=2.0?3:relativeBurden>=1?2:1}</span>
+                    <span class="badge bg-vol">📦 ${m.v}</span>
+                </td>
             </tr>`;
         });
-        resHtml += `</table>`;
-        document.getElementById('resultArea').innerHTML = resHtml;
+        document.getElementById('resArea').innerHTML = hM + `</table>`;
     }
 
-    function copyResult(type) {
-        let text = "";
-        if (type === 'tent') {
-            if (lastTentGroups.length === 0) { alert('先に計算してください。'); return; }
-            text += "【テント班編成】\n";
-            lastTentGroups.forEach(tg => {
-                let mNames = tg.members.map(m => m.name).join(', ');
-                text += `■ ${tg.groupName} (${tg.tentType})\n  メンバー: ${mNames}\n`;
-            });
-        } else if (type === 'food') {
-            if (lastFoodGroups.length === 0) { alert('先に計算してください。'); return; }
-            text += "【食事班編成】\n";
-            lastFoodGroups.forEach(fg => {
-                let mNames = fg.members.map(m => m.name).join(', ');
-                text += `■ ${fg.groupName} (${fg.totalWeight.toFixed(2)}kg)\n  メンバー: ${mNames}\n`;
-            });
-        } else if (type === 'member') {
-            if (lastAllMembers.length === 0) { alert('先に計算してください。'); return; }
-            text += "【個人別 担当装備一覧】\n";
-            lastAllMembers.forEach(m => {
-                let itemNames = m.items.map(i => `${i.name}(${i.weight}kg)`).join(', ');
-                text += `・${m.name}: ${m.totalWeight.toFixed(2)}kg [${itemNames}]\n`;
+    function copyRes(type) {
+        let t = "";
+        if(type==='tent') {
+            if(!g_tents.length) return alert('テント班はありません');
+            t += "【テント班編成】\n";
+            g_tents.forEach(g => t += `■ ${g.name} (${g.tName})\n  メンバー: ${g.m.map(m=>m.name).join(', ')}\n`);
+        } else if(type==='food') {
+            if(!g_foods.length) return alert('食事班はありません');
+            t += "【食事班編成（出発時の総重量）】\n";
+            g_foods.forEach(g => t += `■ ${g.name} (総重量: ${g.tw.toFixed(1)}kg)\n  メンバー: ${g.m.map(m=>m.name).join(', ')}\n`);
+        } else if(type==='member') {
+            if(!g_members.length) return;
+            t += "【個人別 担当装備一覧（出発時点）】\n";
+            g_members.forEach(m => {
+                let aff = [];
+                if(m.tentName) aff.push(m.tentName);
+                if(m.foodName) aff.push(m.foodName);
+                let affStr = aff.length > 0 ? ` [${aff.join('/')}]` : '';
+                t += `・${m.name}${affStr}: ${m.w.toFixed(1)}kg / 容積${m.v}\n  [ ${m.items.map(i=>i.name).join(', ')} ]\n`;
             });
         }
-
-        navigator.clipboard.writeText(text).then(() => {
-            alert('コピーしました！LINEなどに貼り付けられます。');
-        }).catch(() => {
-            alert('コピーに失敗しました。');
-        });
+        navigator.clipboard.writeText(t).then(()=>alert('コピーしました！')).catch(()=>alert('失敗しました'));
     }
 
-    window.onload = initUI;
+    window.onload = init;
 </script>
-
 </body>
 </html>
